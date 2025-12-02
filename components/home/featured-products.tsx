@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ProductCard } from './types';
+import { ProductCard } from '@/types/home';
 
 type Palette = { accent: string; border: string; card: string; muted: string };
 

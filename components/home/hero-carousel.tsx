@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { HeroSlide } from './types';
+import { HeroSlide } from '@/types/home';
 
 type Props = {
   slides: HeroSlide[];

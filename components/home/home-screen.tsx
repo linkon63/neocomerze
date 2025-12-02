@@ -17,7 +17,8 @@ import { FeaturedProductsSection } from './featured-products';
 import { TestimonialsSection } from './testimonials-section';
 import { LatestArrivals } from './latest-arrivals';
 import { FooterSection } from './footer-section';
-import { CategoryItem, HeroSlide, ProductCard } from './types';
+import { CategoryItem, HeroSlide, ProductCard } from '@/types/home';
+import { DeliverySection } from './delivery-section';
 
 const fallbackHeroSlides: HeroSlide[] = [
   {
@@ -246,7 +247,11 @@ export default function HomeScreen() {
       edges={['top', 'left', 'right']}>
       <ThemedView style={[styles.screen, { backgroundColor: palette.background }]}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <NavBar accent={palette.accent} onProfilePress={() => router.push('/profile')} />
+          <NavBar
+            accent={palette.accent}
+            onProfilePress={() => router.push('/profile')}
+            onSearch={(value) => console.log('search', value)}
+          />
 
           <HeroCarousel
             slides={heroSlides}
@@ -296,6 +301,8 @@ export default function HomeScreen() {
             onAdd={(product) => addItem({ ...product, variantId: null, variantLabel: undefined })}
             onPressProduct={(id) => router.push(`/product/${id}`)}
           />
+
+          <DeliverySection palette={{ accent: palette.accent, border: palette.border, card: palette.card, muted: palette.muted }} />
 
           <FooterSection palette={{ card: palette.card, border: palette.border, muted: palette.muted }} textColor={textColor} />
         </ScrollView>
@@ -608,6 +615,34 @@ const styles = StyleSheet.create({
   seeMoreText: {
     fontWeight: '700',
     fontSize: 13,
+  },
+  aboutCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  aboutTitle: {
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  aboutBody: {
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  aboutButton: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  aboutButtonText: {
+    fontWeight: '700',
+    color: '#ffffff',
   },
   footer: {
     padding: 18,

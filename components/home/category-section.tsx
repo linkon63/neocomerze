@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { CategoryItem } from './types';
+import { CategoryItem } from '@/types/home';
 
 type Props = {
   categories: CategoryItem[];
