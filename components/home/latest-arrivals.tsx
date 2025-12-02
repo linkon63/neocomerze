@@ -49,7 +49,7 @@ export function LatestArrivals({ products, palette, isDark, onAdd, onPressProduc
                 <Pressable
                   style={[styles.primary, { backgroundColor: palette.accent }]}
                   onPress={() => onAdd(product)}>
-                  <ThemedText style={styles.primaryText}>Add to cart</ThemedText>
+                  <ThemedText style={styles.primaryText}>Cart</ThemedText>
                 </Pressable>
                 <Pressable
                   style={[styles.ghost, { borderColor: palette.accent }]}
