@@ -1,5 +1,6 @@
 // export const API_BASE_URL = 'https://bunon.hs-inventory.softzino.xyz/api/v1';
-export const API_BASE_URL = "https://barnoi.hs-inventory.softzino.xyz/api/v1"
+// export const API_BASE_URL = "https://barnoi.hs-inventory.softzino.xyz/api/v1"
+export const API_BASE_URL = 'https://radi.hs-inventory.softzino.xyz/api/v1';
 
 export const endpoints = {
   products: `${API_BASE_URL}/products`,
