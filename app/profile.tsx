@@ -22,10 +22,10 @@ type TabItem = {
 };
 
 const tabs: TabItem[] = [
+  { key: 'home', title: 'Home', icon: 'home-outline' },
   { key: 'profile', title: 'Profile info', icon: 'person-circle-outline' },
   { key: 'address', title: 'Address', icon: 'location-outline' },
   { key: 'orders', title: 'Orders', icon: 'bag-handle-outline' },
-  { key: 'home', title: 'Home', icon: 'home-outline' },
   { key: 'logout', title: 'Logout', icon: 'log-out-outline' },
 ];
 
@@ -67,13 +67,6 @@ export default function ProfileScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          <View style={styles.actionsRow}>
-            <Pressable style={styles.homeButton} onPress={() => router.replace('/')}>
-              <Ionicons name="home-outline" size={18} color="#ffffff" />
-              <ThemedText style={styles.homeButtonText}>Go to Home</ThemedText>
-            </Pressable>
-          </View>
-
           <View style={styles.headerCard}>
             <View style={styles.avatarWrap}>
               <View style={styles.avatarGlow}>
