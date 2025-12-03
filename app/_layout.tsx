@@ -7,6 +7,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { CartProvider } from '@/context/cart-context';
 import { useCart } from '@/context/cart-context';
+import { AuthProvider } from '@/context/auth-context';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -16,18 +17,21 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <CartProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <View style={{ flex: 1 }}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          </Stack>
-          <ToastBanner />
-        </View>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <View style={{ flex: 1 }}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+            </Stack>
+            <ToastBanner />
+          </View>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
