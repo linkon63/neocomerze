@@ -5,14 +5,30 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 
 type Props = {
-  palette: { card: string; border: string; muted: string };
+  palette: { card: string; border: string; muted: string; accent: string };
   textColor: string;
+  logoUrl?: string;
+  shopName?: string;
+  topBarSlogan?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  address?: string;
+  whatsapp?: string;
 };
 
-export function FooterSection({ palette, textColor }: Props) {
+export function FooterSection({
+  palette,
+  textColor,
+  logoUrl,
+  shopName,
+  topBarSlogan,
+  contactPhone,
+  contactEmail,
+  address,
+  whatsapp = "01712508063",
+}: Props) {
   const openWhatsApp = () => {
-    const phone = "01712508063";
-    const url = `https://wa.me/88${phone}`;
+    const url = `https://wa.me/88${whatsapp}`;
     Linking.openURL(url);
   };
 
@@ -25,11 +41,11 @@ export function FooterSection({ palette, textColor }: Props) {
     >
       <View style={styles.topRow}>
         <Image
-          source={require("../../public/jannat.png")}
+          source={logoUrl ? { uri: logoUrl } : require("../../public/jannat.png")}
           style={styles.logo}
           contentFit="contain"
         />
-        <ThemedText type="subtitle">NeoComerze</ThemedText>
+        <ThemedText type="subtitle">{shopName || "NeoComerze"}</ThemedText>
         <View style={styles.brandCopy}>
           <ThemedText
             style={[
@@ -37,12 +53,12 @@ export function FooterSection({ palette, textColor }: Props) {
               { color: palette.muted, textAlign: "center" },
             ]}
           >
-            Everyday essentials, delivered fast with care.
+            {topBarSlogan || "Everyday essentials, delivered fast with care."}
           </ThemedText>
         </View>
       </View>
       <Pressable
-        style={[styles.primaryCta, { backgroundColor: 'orange' }]}
+        style={[styles.primaryCta, { backgroundColor: palette.accent }]}
         onPress={openWhatsApp}
       >
         <ThemedText style={styles.primaryCtaText}>
@@ -52,13 +68,15 @@ export function FooterSection({ palette, textColor }: Props) {
 
       <View style={styles.contactRow}>
         <ThemedText style={[styles.contactText, { color: palette.muted }]}>
-          Phone: +880 1700-000000
+          Phone: {contactPhone || "+880 1700-000000"}
         </ThemedText>
+        {contactEmail ? (
+          <ThemedText style={[styles.contactText, { color: palette.muted }]}>
+            Email: {contactEmail}
+          </ThemedText>
+        ) : null}
         <ThemedText style={[styles.contactText, { color: palette.muted }]}>
-          Email: support@neocomerze.com
-        </ThemedText>
-        <ThemedText style={[styles.contactText, { color: palette.muted }]}>
-          Address: 123 Banani, Dhaka, Bangladesh
+          Address: {address || "123 Banani, Dhaka, Bangladesh"}
         </ThemedText>
       </View>
 

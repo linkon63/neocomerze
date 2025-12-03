@@ -9,9 +9,11 @@ type Props = {
   accent: string;
   onProfilePress: () => void;
   onSearch?: (value: string) => void;
+  logoUrl?: string;
+  shopName?: string;
 };
 
-export function NavBar({ accent, onProfilePress, onSearch }: Props) {
+export function NavBar({ accent, onProfilePress, onSearch, logoUrl, shopName }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const handleSearch = (value: string) => {
     if (onSearch) onSearch(value);
@@ -20,11 +22,15 @@ export function NavBar({ accent, onProfilePress, onSearch }: Props) {
   return (
     <View style={styles.navBar}>
       <View style={styles.logoRow}>
-        <Image source={require('../../public/jannat.png')} style={styles.logo} contentFit="contain" />
+        <Image
+          source={logoUrl ? { uri: logoUrl } : require('../../public/jannat.png')}
+          style={styles.logo}
+          contentFit="contain"
+        />
       </View>
       <View style={styles.searchContainer}>
         <TextInput
-          placeholder="What are you looking for?"
+          placeholder="Looking for?"
           placeholderTextColor="#4b5563"
           onChangeText={handleSearch}
           underlineColorAndroid="transparent"
@@ -61,8 +67,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    width: 76,
-    height: 76,
+    width: 72,
+    height: 72,
   },
   searchWrap: {
     flex: 1,

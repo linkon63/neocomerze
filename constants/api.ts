@@ -7,4 +7,5 @@ export const endpoints = {
   categories: `${API_BASE_URL}/categories`,
   campaigns: `${API_BASE_URL}/campaigns?status=true`,
   productDetail: (id: string | number) => `${API_BASE_URL}/products/${id}`,
+  generalInfo: `${API_BASE_URL}/general-infos`,
 };

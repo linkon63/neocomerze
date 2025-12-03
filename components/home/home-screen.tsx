@@ -17,7 +17,7 @@ import { FeaturedProductsSection } from './featured-products';
 import { TestimonialsSection } from './testimonials-section';
 import { LatestArrivals } from './latest-arrivals';
 import { FooterSection } from './footer-section';
-import { CategoryItem, HeroSlide, ProductCard } from '@/types/home';
+import { CategoryItem, HeroSlide, ProductCard, GeneralInfo } from '@/types/home';
 import { DeliverySection } from './delivery-section';
 
 const fallbackHeroSlides: HeroSlide[] = [
@@ -141,8 +141,12 @@ export default function HomeScreen() {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [generalInfo, setGeneralInfo] = useState<GeneralInfo | null>(null);
   const textColor = isDark ? Colors.dark.text : Colors.light.text;
   const testimonialWidth = screenWidth - 48;
+  const generalPhone =
+    generalInfo?.top_bar_slogan?.match(/(\+?\d[\d\s-]+)/)?.[1]?.trim() || undefined;
+  const generalLogo = generalInfo?.media?.[0]?.original_url;
 
   useEffect(() => {
     let isMounted = true;
@@ -235,6 +239,13 @@ export default function HomeScreen() {
     loadCampaigns();
     loadProducts();
     loadCategories();
+    fetchJson<{ generalInfo?: GeneralInfo }>(endpoints.generalInfo)
+      .then((json) => {
+        if (json?.generalInfo && isMounted) {
+          setGeneralInfo(json.generalInfo);
+        }
+      })
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -251,6 +262,8 @@ export default function HomeScreen() {
             accent={palette.accent}
             onProfilePress={() => router.push('/profile')}
             onSearch={(value) => console.log('search', value)}
+            logoUrl={generalLogo}
+            shopName={generalInfo?.shop_name}
           />
 
           <HeroCarousel
@@ -304,7 +317,17 @@ export default function HomeScreen() {
 
           <DeliverySection palette={{ accent: palette.accent, border: palette.border, card: palette.card, muted: palette.muted }} />
 
-          <FooterSection palette={{ card: palette.card, border: palette.border, muted: palette.muted }} textColor={textColor} />
+          <FooterSection
+            palette={{ card: palette.card, border: palette.border, muted: palette.muted, accent: palette.accent }}
+            textColor={textColor}
+            logoUrl={generalLogo}
+            shopName={generalInfo?.shop_name}
+            topBarSlogan={generalInfo?.top_bar_slogan}
+            contactPhone={generalPhone}
+            contactEmail={undefined}
+            address={undefined}
+            whatsapp="01712508063"
+          />
         </ScrollView>
       </ThemedView>
     </SafeAreaView>
