@@ -72,7 +72,12 @@ type ApiProduct = {
   name?: { en?: string };
   media?: { original_url?: string }[];
   tags?: { name?: string }[];
-  variants?: { current_pricing?: { unit_price?: string } }[];
+  variants?: {
+    id: number;
+    sku?: string;
+    option_values?: { name?: { en?: string } }[];
+    current_pricing?: { unit_price?: string };
+  }[];
   description?: { en?: string };
 };
 
@@ -186,6 +191,11 @@ export default function HomeScreen() {
         const json = await fetchJson<{ data?: ApiProduct[] }>(endpoints.products);
         const mapped: ProductCard[] = (json?.data)?.map((item) => {
           const firstVariant = item.variants?.[0];
+          const variantLabel =
+            firstVariant?.option_values
+              ?.map((o) => o.name?.en)
+              .filter(Boolean)
+              .join(' / ') || firstVariant?.sku;
           return {
             id: item.id,
             name: item.name?.en ?? 'Unnamed item',
@@ -193,6 +203,8 @@ export default function HomeScreen() {
             image: item.media?.[0]?.original_url,
             badge: item.tags?.[0]?.name,
             description: item.description?.en,
+            variantId: firstVariant?.id ?? null,
+            variantLabel: variantLabel || undefined,
           };
         }) ?? [];
 
@@ -291,7 +303,13 @@ export default function HomeScreen() {
             error={error}
             palette={{ accent: palette.accent, border: palette.border, card: palette.card, muted: palette.muted }}
             isDark={isDark}
-            onAdd={(product) => addItem({ ...product, variantId: null, variantLabel: undefined })}
+            onAdd={(product) =>
+              addItem({
+                ...product,
+                variantId: product.variantId ?? null,
+                variantLabel: product.variantLabel,
+              })
+            }
             onPressProduct={(id) => router.push(`/product/${id}`)}
             onViewAll={() => router.push('/products')}
           />
@@ -311,7 +329,13 @@ export default function HomeScreen() {
             products={products}
             palette={{ accent: palette.accent, border: palette.border, card: palette.card, muted: palette.muted }}
             isDark={isDark}
-            onAdd={(product) => addItem({ ...product, variantId: null, variantLabel: undefined })}
+            onAdd={(product) =>
+              addItem({
+                ...product,
+                variantId: product.variantId ?? null,
+                variantLabel: product.variantLabel,
+              })
+            }
             onPressProduct={(id) => router.push(`/product/${id}`)}
           />
 

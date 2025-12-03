@@ -16,7 +16,12 @@ type ApiProduct = {
   name?: { en?: string };
   media?: { original_url?: string }[];
   tags?: { name?: string }[];
-  variants?: { current_pricing?: { unit_price?: string } }[];
+  variants?: {
+    id: number;
+    sku?: string;
+    option_values?: { name?: { en?: string } }[];
+    current_pricing?: { unit_price?: string };
+  }[];
 };
 
 type ProductCard = {
@@ -25,6 +30,8 @@ type ProductCard = {
   price: string;
   image?: string;
   badge?: string;
+  variantId?: number | null;
+  variantLabel?: string;
 };
 
 export default function ProductsScreen() {
@@ -56,12 +63,19 @@ export default function ProductsScreen() {
         const json = await res.json();
         const mapped: ProductCard[] = (json?.data as ApiProduct[] | undefined)?.map((item) => {
           const firstVariant = item.variants?.[0];
+          const variantLabel =
+            firstVariant?.option_values
+              ?.map((o) => o.name?.en)
+              .filter(Boolean)
+              .join(' / ') || firstVariant?.sku;
           return {
             id: item.id,
             name: item.name?.en ?? 'Unnamed item',
             price: firstVariant?.current_pricing?.unit_price ?? 'BDT —',
             image: item.media?.[0]?.original_url,
             badge: item.tags?.[0]?.name,
+            variantId: firstVariant?.id ?? null,
+            variantLabel: variantLabel || undefined,
           };
         }) ?? [];
         if (isMounted) {
@@ -91,25 +105,32 @@ export default function ProductsScreen() {
       <View style={styles.meta}>
         <ThemedText style={styles.name}>{item.name}</ThemedText>
         <ThemedText style={[styles.price, { color: palette.accent }]}>{item.price}</ThemedText>
-        {item.badge ? (
-          <View style={[styles.badge, { backgroundColor: palette.accent }]}>
-            <ThemedText style={styles.badgeText}>{item.badge}</ThemedText>
-          </View>
-        ) : null}
-        <Pressable
-          style={[styles.addButton, { borderColor: palette.accent, backgroundColor: palette.accent }]}
-          onPress={() =>
-            addItem({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              image: item.image,
-              variantId: null,
-              variantLabel: undefined,
-            })
-          }>
-          <ThemedText style={styles.addText}>Add to cart</ThemedText>
-        </Pressable>
+        <View style={styles.buttonRow}>
+          <Pressable
+            style={[styles.iconButton, { borderColor: palette.accent }]}
+            onPress={() =>
+              addItem({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                variantId: item.variantId ?? null,
+                variantLabel: item.variantLabel,
+              })
+            }>
+            <ThemedText style={[styles.iconButtonText, { color: palette.accent }]}>＋</ThemedText>
+          </Pressable>
+          <Pressable
+            style={[styles.buyButton, { backgroundColor: palette.accent }]}
+            onPress={() => router.push(`/product/${item.id}`)}>
+            <ThemedText style={[styles.buyText, { color: '#ffffff' }]}>Buy</ThemedText>
+          </Pressable>
+          <Pressable
+            style={[styles.iconButton, { borderColor: palette.accent }]}
+            onPress={() => console.log('wishlist')}>
+            <ThemedText style={[styles.iconButtonText, { color: palette.accent }]}>♡</ThemedText>
+          </Pressable>
+        </View>
       </View>
     </Pressable>
   );
@@ -165,11 +186,12 @@ const styles = StyleSheet.create({
   },
   meta: {
     padding: 12,
-    gap: 6,
+    gap: 4,
   },
   name: {
     fontWeight: '700',
     fontSize: 13,
+    lineHeight: 17,
   },
   price: {
     fontWeight: '700',
@@ -186,18 +208,31 @@ const styles = StyleSheet.create({
     color: '#0f403a',
     fontSize: 10,
   },
-  addButton: {
-    marginTop: 4,
-    paddingVertical: 10,
+  buttonRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderWidth: 1,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconButtonText: { fontWeight: '700', fontSize: 16 },
+  buyButton: {
+    paddingHorizontal: 14,
+    height: 36,
     borderWidth: 0,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  addText: {
-    fontWeight: '700',
-    fontSize: 12,
-    color: '#ffffff',
-  },
+  buyText: { fontWeight: '700', fontSize: 13 },
   loadingWrap: {
     flex: 1,
     alignItems: 'center',

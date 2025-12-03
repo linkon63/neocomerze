@@ -20,6 +20,8 @@ export type ProductCard = {
   image?: string;
   badge?: string;
   description?: string;
+  variantId?: number | null;
+  variantLabel?: string;
 };
 
 export type GeneralInfo = {
