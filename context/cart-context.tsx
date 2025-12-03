@@ -12,7 +12,7 @@ type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   clear: () => void;
   remove: (id: number, variantId?: number | null) => void;
   toastMessage: string | null;
@@ -34,15 +34,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toastTimeout.current = setTimeout(() => setToastMessage(null), 1800);
   };
 
-  const addItem = (item: Omit<CartItem, 'quantity'>) => {
+  const addItem = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
+    const safeQuantity = Math.max(1, Math.floor(quantity));
     setItems((prev) => {
       const existing = prev.find(
         (p) => p.id === item.id && (p.variantId ?? null) === (item.variantId ?? null)
       );
       if (existing) {
-        return prev.map((p) => (p === existing ? { ...p, quantity: p.quantity + 1 } : p));
+        return prev.map((p) =>
+          p === existing ? { ...p, quantity: p.quantity + safeQuantity } : p
+        );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity: safeQuantity }];
     });
     showToast('Added to cart');
   };

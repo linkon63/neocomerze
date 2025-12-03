@@ -46,6 +46,11 @@ export default function ProfileScreen() {
     [activeTab]
   );
 
+  const handleLogout = () => {
+    logout();
+    router.replace('/');
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -67,7 +72,7 @@ export default function ProfileScreen() {
       case 'home':
         return null;
       case 'logout':
-        return <LogoutCard onLogout={logout} />;
+        return <LogoutCard onLogout={handleLogout} />;
       default:
         return null;
     }
