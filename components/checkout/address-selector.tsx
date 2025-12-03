@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { collection, doc, getDoc } from 'firebase/firestore';
 
@@ -14,7 +14,13 @@ export type CheckoutAddress = {
   label: string;
   address: string;
   city?: string;
+  state?: string;
+  area?: string;
+  postcode?: string;
   phone?: string;
+  firstName?: string;
+  lastName?: string;
+  customerId?: string | null;
   isDefault?: boolean;
 };
 
@@ -58,6 +64,7 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [divisionOpen, setDivisionOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
+  const initialSelectedRef = useRef(selectedId);
 
   const selectedAddress = useMemo(
     () => addresses.find((a) => a.id === selectedId) || null,
@@ -109,19 +116,25 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
           (json?.addresses as any[]) ||
           (json?.data?.mailing_address ? [json.data.mailing_address] : []) ||
           (json?.mailing_address ? [json.mailing_address] : []);
-        console.log('Fetched addresses:', raw);
+
         const mapped: CheckoutAddress[] =
           raw?.map((a: any, idx: number) => ({
             id: a?.id?.toString() || `addr-${idx}`,
             label: `${a?.first_name ?? ''} ${a?.last_name ?? ''}`.trim() || 'Saved address',
             address: a?.address || a?.addressLine || '',
             city: a?.city,
+            state: a?.state,
+            area: a?.area || a?.address,
+            postcode: a?.postcode,
             phone: a?.phone,
+            firstName: a?.first_name,
+            lastName: a?.last_name,
+            customerId,
             isDefault: Boolean(a?.is_default),
           })) ?? [];
 
         setAddresses(mapped);
-        if (!selectedId && mapped.length) {
+        if (!initialSelectedRef.current && mapped.length) {
           onSelect(mapped[0]);
         }
       } catch (err: any) {
@@ -131,7 +144,8 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
       }
     };
     loadAddresses();
-  }, [customerId, onSelect, selectedId]);
+    // Intentionally avoid re-running on selection change to prevent rerender loop.
+  }, [customerId]);
 
   const updateField = (key: keyof FormState, value: string) => {
     setForm((prev) => {
@@ -193,7 +207,13 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
         label: `${form.firstName} ${form.lastName}`,
         address: `${form.area}, ${form.addressLine}`,
         city: districtName(form.districtId) || form.area,
+        state: divisionName(form.divisionId),
+        area: form.area,
+        postcode: form.postcode,
         phone: form.phone,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        customerId,
         isDefault: true,
       };
       setAddresses((prev) => [newAddress, ...prev]);

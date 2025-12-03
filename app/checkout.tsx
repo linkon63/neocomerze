@@ -12,6 +12,7 @@ import { useCart } from '@/context/cart-context';
 import { AddressSelector, CheckoutAddress } from '@/components/checkout/address-selector';
 import { PaymentMethodCard } from '@/components/checkout/payment-method';
 import { CartLines } from '@/components/checkout/cart-lines';
+import { endpoints } from '@/constants/api';
 
 export default function CheckoutScreen() {
   const { items, clear, showToast } = useCart();
@@ -20,6 +21,7 @@ export default function CheckoutScreen() {
   const accent = isDark ? '#81c8be' : '#0f766e';
   const [selectedAddress, setSelectedAddress] = useState<CheckoutAddress | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod'>('cod');
+  const [placing, setPlacing] = useState(false);
 
   const parsePrice = (price: string) => {
     const numeric = parseFloat(price.replace(/[^0-9.-]/g, ''));
@@ -34,7 +36,7 @@ export default function CheckoutScreen() {
   const delivery = items.length ? 0 : 0;
   const total = subtotal + delivery;
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!items.length) {
       showToast('Cart is empty');
       return;
@@ -43,9 +45,82 @@ export default function CheckoutScreen() {
       showToast('Select an address');
       return;
     }
-    showToast('Order placed (COD)');
-    clear();
-    router.replace('/');
+    if (!selectedAddress.customerId) {
+      showToast('Missing customer');
+      return;
+    }
+
+    const buildAddressPayload = (type: 'billing' | 'shipping') => ({
+      first_name: selectedAddress.firstName || selectedAddress.label.split(' ')[0] || 'Customer',
+      last_name: selectedAddress.lastName || selectedAddress.label.split(' ').slice(1).join(' ') || '',
+      phone: selectedAddress.phone || '',
+      state: selectedAddress.state || '',
+      city: selectedAddress.city || '',
+      area: selectedAddress.area || selectedAddress.address,
+      postcode: selectedAddress.postcode || '',
+      address: selectedAddress.address,
+      landmark: '',
+      type,
+    });
+
+    const payload = {
+      customer_id: Number(selectedAddress.customerId) || selectedAddress.customerId,
+      channel_id: 2,
+      amount_due: total,
+      amount_paid: 0,
+      amount_change: 0,
+      billing_address: buildAddressPayload('billing'),
+      shipping_address: buildAddressPayload('shipping'),
+      payment: {
+        intent: 'sale',
+        status: 'unpaid',
+        meta_data: [
+          {
+            provider: 'Cash on Delivery',
+            type: 'cash',
+            amount: total.toString(),
+            payment_information: 'Cash on Delivery',
+            vouchers: [],
+          },
+        ],
+      },
+      purchasable: items.map((item) => ({
+        id: item.variantId ?? item.id,
+        quantity: item.quantity,
+        discount_should_apply: false,
+        order_quantity: item.quantity,
+        uom_id: 2,
+        uom: 'pcs',
+        order_uom_id: 1,
+        order_uom: 'pcs',
+        batch_id: null,
+      })),
+      meta_data: {
+        shipping_charge: {
+          amount: delivery,
+          currency_code: 'BDT',
+        },
+      },
+    };
+
+    try {
+      setPlacing(true);
+      const res = await fetch(endpoints.orders, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        throw new Error(`Order failed (${res.status})`);
+      }
+      showToast('Order placed');
+      clear();
+      router.replace('/');
+    } catch (err: any) {
+      showToast(err?.message || 'Could not place order');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (!items.length) {
@@ -107,9 +182,15 @@ export default function CheckoutScreen() {
           </View>
           <View style={{ flex: 1 }} />
           <Pressable
-            style={[styles.checkoutButton, { backgroundColor: accent }]}
+            style={[
+              styles.checkoutButton,
+              { backgroundColor: accent, opacity: placing ? 0.7 : 1 },
+            ]}
+            disabled={placing}
             onPress={handlePlaceOrder}>
-            <ThemedText style={styles.checkoutText}>Place order (COD)</ThemedText>
+            <ThemedText style={styles.checkoutText}>
+              {placing ? 'Placing…' : 'Place order (COD)'}
+            </ThemedText>
           </Pressable>
         </View>
       </ThemedView>

@@ -12,4 +12,5 @@ export const endpoints = {
   register: `${API_BASE_URL}/register`,
   customers: `${API_BASE_URL}/customers`,
   profile: `${API_BASE_URL}/profile`,
+  orders: `${API_BASE_URL}/orders`,
 };
