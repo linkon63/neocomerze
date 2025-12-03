@@ -3,6 +3,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 
+const ACCENT = '#f85606';
+const ACCENT_SOFT = '#fff7ed';
+
 type PaymentMethod = 'cod';
 
 type Props = {
@@ -32,15 +35,15 @@ export function PaymentMethodCard({ value, onChange }: Props) {
               style={[
                 styles.option,
                 {
-                  borderColor: isActive ? '#0f766e' : '#e5e7eb',
-                  backgroundColor: isActive ? '#ecfdf3' : '#ffffff',
+                  borderColor: isActive ? ACCENT : '#e5e7eb',
+                  backgroundColor: isActive ? ACCENT_SOFT : '#ffffff',
                 },
               ]}
               onPress={() => onChange(opt.key)}>
               <Ionicons
                 name={isActive ? 'radio-button-on' : 'radio-button-off'}
                 size={18}
-                color={isActive ? '#0f766e' : '#9ca3af'}
+                color={isActive ? ACCENT : '#9ca3af'}
               />
               <View style={styles.meta}>
                 <ThemedText style={styles.title}>{opt.title}</ThemedText>

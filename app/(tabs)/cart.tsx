@@ -15,7 +15,7 @@ export default function CartScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const textColor = isDark ? Colors.dark.text : Colors.light.text;
-  const accent = isDark ? '#81c8be' : '#0f766e';
+  const accent = isDark ? '#f47223' : '#f85606';
 
   const parsePrice = (price: string) => {
     const numeric = parseFloat(price.replace(/[^0-9.-]/g, ''));
@@ -33,9 +33,7 @@ export default function CartScreen() {
       )}
       <View style={styles.meta}>
         <ThemedText style={styles.name}>{item.name}</ThemedText>
-        <ThemedText style={[styles.price, { color: isDark ? '#81c8be' : '#0f766e' }]}>
-          {item.price}
-        </ThemedText>
+        <ThemedText style={[styles.price, { color: accent }]}>{item.price}</ThemedText>
         {item.variantLabel ? (
           <ThemedText style={[styles.variant, { color: isDark ? '#7b828f' : '#7a6f5f' }]}>
             {item.variantLabel}

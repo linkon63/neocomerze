@@ -18,7 +18,7 @@ export default function CheckoutScreen() {
   const { items, clear, showToast } = useCart();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const accent = isDark ? '#81c8be' : '#0f766e';
+  const accent = isDark ? '#f47223' : '#f85606';
   const [selectedAddress, setSelectedAddress] = useState<CheckoutAddress | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod'>('cod');
   const [placing, setPlacing] = useState(false);
@@ -189,7 +189,7 @@ export default function CheckoutScreen() {
             disabled={placing}
             onPress={handlePlaceOrder}>
             <ThemedText style={styles.checkoutText}>
-              {placing ? 'Placing…' : 'Place order (COD)'}
+              {placing ? 'Placing…' : 'Place Order'}
             </ThemedText>
           </Pressable>
         </View>

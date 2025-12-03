@@ -53,6 +53,9 @@ const initialForm: FormState = {
   country: 'Bangladesh',
 };
 
+const ACCENT = '#f85606';
+const ACCENT_SOFT = '#fff7ed';
+
 export function AddressSelector({ selectedId, onSelect }: Props) {
   const { userPhone } = useAuth();
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -230,21 +233,21 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
     <View style={styles.section}>
       <View style={styles.header}>
         <View>
-          <ThemedText type="subtitle">Delivery address</ThemedText>
-          <ThemedText style={styles.hint}>Select or add where to deliver.</ThemedText>
-        </View>
-        <Pressable style={styles.addButton} onPress={() => setShowForm(true)}>
-          <Ionicons name="add" size={16} color="#0f766e" />
-          <ThemedText style={styles.addText}>Add</ThemedText>
-        </Pressable>
+        <ThemedText type="subtitle">Delivery address</ThemedText>
+        <ThemedText style={styles.hint}>Select or add where to deliver.</ThemedText>
       </View>
+      <Pressable style={styles.addButton} onPress={() => setShowForm(true)}>
+        <Ionicons name="add" size={16} color={ACCENT} />
+        <ThemedText style={styles.addText}>Add</ThemedText>
+      </Pressable>
+    </View>
 
-      {loading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator color="#0f766e" />
-          <ThemedText style={styles.hint}>Loading addresses…</ThemedText>
-        </View>
-      ) : addresses.length === 0 ? (
+    {loading ? (
+      <View style={styles.loading}>
+        <ActivityIndicator color={ACCENT} />
+        <ThemedText style={styles.hint}>Loading addresses…</ThemedText>
+      </View>
+    ) : addresses.length === 0 ? (
         <View style={styles.empty}>
           <ThemedText style={styles.hint}>No saved addresses yet.</ThemedText>
           <Pressable style={styles.emptyAdd} onPress={() => setShowForm(true)}>
@@ -261,8 +264,8 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
                 style={[
                   styles.addressCard,
                   {
-                    borderColor: isActive ? '#0f766e' : '#e5e7eb',
-                    backgroundColor: isActive ? '#ecfdf3' : '#ffffff',
+                    borderColor: isActive ? ACCENT : '#e5e7eb',
+                    backgroundColor: isActive ? ACCENT_SOFT : '#ffffff',
                   },
                 ]}
                 onPress={() => onSelect(addr)}>
@@ -270,7 +273,7 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
                   <Ionicons
                     name={isActive ? 'radio-button-on' : 'radio-button-off'}
                     size={18}
-                    color={isActive ? '#0f766e' : '#9ca3af'}
+                    color={isActive ? ACCENT : '#9ca3af'}
                   />
                   <View style={styles.addressMeta}>
                     <ThemedText style={styles.addrTitle}>{addr.label}</ThemedText>
@@ -450,11 +453,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#0f766e',
-    backgroundColor: '#ecfdf3',
+    borderColor: ACCENT,
+    backgroundColor: ACCENT_SOFT,
   },
   addText: {
-    color: '#0f766e',
+    color: ACCENT,
     fontWeight: '700',
   },
   loading: {
@@ -474,7 +477,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#0f766e',
+    backgroundColor: ACCENT,
     borderRadius: 10,
   },
   emptyAddText: {
@@ -509,7 +512,7 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: '#0f766e',
+    backgroundColor: ACCENT,
     borderRadius: 8,
   },
   badgeText: {
@@ -593,7 +596,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingVertical: 12,
     borderRadius: 10,
-    backgroundColor: '#0f766e',
+    backgroundColor: ACCENT,
     alignItems: 'center',
   },
   saveText: {

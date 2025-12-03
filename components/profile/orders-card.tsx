@@ -164,11 +164,6 @@ export function OrdersCard() {
 
   return (
     <ThemedView style={styles.card}>
-      <View style={styles.header}>
-        <ThemedText style={styles.heading}>Orders</ThemedText>
-        <ThemedText style={styles.hint}>Track delivery status and totals.</ThemedText>
-      </View>
-
       {loading ? (
         <View style={styles.loading}>
           <ActivityIndicator color="#f97316" />
@@ -242,16 +237,7 @@ export function OrdersCard() {
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#f1f3f5',
-    shadowColor: '#0f172a',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 12,
-    gap: 12,
+        backgroundColor: '#ffffff',
   },
   header: { gap: 4 },
   heading: {

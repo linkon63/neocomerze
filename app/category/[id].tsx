@@ -39,7 +39,7 @@ export default function CategoryProductsScreen() {
       background: isDark ? '#0f1115' : '#f4f0e7',
       card: isDark ? '#1a1d24' : '#ffffff',
       muted: isDark ? '#7b828f' : '#7a6f5f',
-      accent: isDark ? '#81c8be' : '#0f766e',
+      accent: isDark ? '#f47223' : '#f85606',
       border: isDark ? '#252832' : '#e8ded0',
     }),
     [isDark]
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontWeight: '700',
-    color: '#0f403a',
+    color: '#ffffff',
     fontSize: 12,
   },
   loadingWrap: {
