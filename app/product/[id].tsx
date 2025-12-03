@@ -64,6 +64,7 @@ export default function ProductDetailScreen() {
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
+  const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
 
   const optionGroups = useMemo(() => {
     const groups: Record<
@@ -379,10 +380,49 @@ export default function ProductDetailScreen() {
               </View>
 
               <View style={styles.metaCard}>
-                <ThemedText type="subtitle">Description</ThemedText>
-                <ThemedText style={[styles.description, { color: palette.muted }]}>
-                  {product.description?.en || 'No description available.'}
-                </ThemedText>
+                <View style={[styles.tabRow, { borderColor: palette.border }]}>
+                  {['description', 'details'].map((tabKey) => {
+                    const isActive = activeTab === tabKey;
+                    const label = tabKey === 'description' ? 'Description' : 'Details';
+                    return (
+                      <Pressable
+                        key={tabKey}
+                        style={[
+                          styles.tabButton,
+                          {
+                            borderColor: isActive ? palette.accent : 'transparent',
+                          },
+                        ]}
+                        onPress={() => setActiveTab(tabKey as 'description' | 'details')}>
+                        <ThemedText
+                          style={[
+                            styles.tabLabel,
+                            { color: isActive ? palette.accent : palette.muted },
+                          ]}>
+                          {label}
+                        </ThemedText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {activeTab === 'description' ? (
+                  <ThemedText style={[styles.description, { color: palette.muted }]}>
+                    {product.description?.en || 'No description available.'}
+                  </ThemedText>
+                ) : (
+                  <View style={styles.detailList}>
+                    <ThemedText style={[styles.detailItem, { color: palette.muted }]}>
+                      SKU: {selectedVariant?.sku || 'N/A'}
+                    </ThemedText>
+                    <ThemedText style={[styles.detailItem, { color: palette.muted }]}>
+                      Variants available: {product.variants?.length ?? 0}
+                    </ThemedText>
+                    <ThemedText style={[styles.detailItem, { color: palette.muted }]}>
+                      Price: {price || 'BDT —'}
+                    </ThemedText>
+                  </View>
+                )}
               </View>
             </>
           )}
@@ -504,5 +544,28 @@ const styles = StyleSheet.create({
   ghostText: {
     fontWeight: '700',
     fontSize: 14,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  tabLabel: {
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  detailList: {
+    gap: 6,
+  },
+  detailItem: {
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

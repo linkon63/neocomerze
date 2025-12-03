@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { router } from 'expo-router';
+
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +15,14 @@ export default function CartScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const textColor = isDark ? Colors.dark.text : Colors.light.text;
+  const accent = isDark ? '#81c8be' : '#0f766e';
+
+  const parsePrice = (price: string) => {
+    const numeric = parseFloat(price.replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(numeric) ? numeric : 0;
+  };
+
+  const total = items.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
 
   const renderItem = ({ item }: any) => (
     <View style={[styles.card, { borderColor: isDark ? '#252832' : '#e8ded0' }]}>
@@ -32,9 +42,13 @@ export default function CartScreen() {
           </ThemedText>
         ) : null}
         <ThemedText style={styles.qty}>Qty: {item.quantity}</ThemedText>
-        <Pressable onPress={() => remove(item.id, item.variantId)}>
-          <ThemedText style={[styles.remove, { color: '#c0362c' }]}>Remove</ThemedText>
-        </Pressable>
+        <View style={styles.cardActions}>
+          <Pressable
+            style={[styles.deleteButton, { borderColor: accent }]}
+            onPress={() => remove(item.id, item.variantId)}>
+            <ThemedText style={[styles.deleteText, { color: accent }]}>Delete</ThemedText>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -57,9 +71,22 @@ export default function CartScreen() {
           />
         )}
         {items.length > 0 ? (
-          <Pressable style={[styles.clearButton, { borderColor: isDark ? '#252832' : '#e8ded0' }]} onPress={clear}>
-            <ThemedText style={[styles.clearText, { color: textColor }]}>Clear cart</ThemedText>
-          </Pressable>
+          <>
+            <View style={[styles.totalCard, { borderColor: isDark ? '#252832' : '#e8ded0' }]}>
+              <ThemedText style={styles.totalLabel}>Total</ThemedText>
+              <ThemedText style={[styles.totalValue, { color: accent }]}>
+                BDT {total.toFixed(2)}
+              </ThemedText>
+            </View>
+            <Pressable
+              style={[styles.checkoutButton, { backgroundColor: accent }]}
+              onPress={() => router.push('/checkout')}>
+              <ThemedText style={styles.checkoutText}>Checkout</ThemedText>
+            </Pressable>
+            <Pressable style={[styles.clearButton, { borderColor: isDark ? '#252832' : '#e8ded0' }]} onPress={clear}>
+              <ThemedText style={[styles.clearText, { color: textColor }]}>Clear cart</ThemedText>
+            </Pressable>
+          </>
         ) : null}
       </ThemedView>
     </SafeAreaView>
@@ -99,8 +126,20 @@ const styles = StyleSheet.create({
   qty: {
     fontSize: 14,
   },
-  remove: {
+  cardActions: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  deleteButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  deleteText: {
     fontWeight: '700',
+    fontSize: 12,
   },
   empty: {
     flex: 1,
@@ -118,5 +157,34 @@ const styles = StyleSheet.create({
   },
   clearText: {
     fontWeight: '700',
+  },
+  totalCard: {
+    marginTop: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderRadius: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalLabel: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  totalValue: {
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  checkoutButton: {
+    marginTop: 8,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  checkoutText: {
+    color: '#ffffff',
+    fontWeight: '800',
+    fontSize: 15,
   },
 });
