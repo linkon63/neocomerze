@@ -14,7 +14,7 @@ import { collection, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/utils/firebase';
 
 export default function LoginScreen() {
-  const { setAuthenticated, isAuthenticated } = useAuth();
+  const { setAuthenticated, setUserPhone, isAuthenticated } = useAuth();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +53,7 @@ export default function LoginScreen() {
         return;
       }
       setAuthenticated(true);
+      setUserPhone(phone);
       router.replace('/profile');
     } catch (err: any) {
       setError(err?.message || 'Login failed. Try again.');

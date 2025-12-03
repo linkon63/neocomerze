@@ -10,4 +10,5 @@ export const endpoints = {
   generalInfo: `${API_BASE_URL}/general-infos`,
   register: `${API_BASE_URL}/register`,
   customers: `${API_BASE_URL}/customers`,
+  profile: `${API_BASE_URL}/profile`,
 };
