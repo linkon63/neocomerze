@@ -15,6 +15,10 @@ type FormState = {
   email: string;
 };
 
+type ProfileInfoCardProps = {
+  onProfileSaved?: (data: FormState) => void;
+};
+
 const initialForm: FormState = {
   firstName: '',
   lastName: '',
@@ -22,7 +26,7 @@ const initialForm: FormState = {
   email: '',
 };
 
-export function ProfileInfoCard() {
+export function ProfileInfoCard({ onProfileSaved }: ProfileInfoCardProps) {
   const { userPhone } = useAuth();
   const [form, setForm] = useState<FormState>(() => ({
     ...initialForm,
@@ -151,6 +155,7 @@ export function ProfileInfoCard() {
         throw new Error(errorText || `Profile update failed (${res.status})`);
       }
 
+      onProfileSaved?.(form);
       setStatus('Profile saved');
     } catch (err: any) {
       setStatus(err?.message || 'Could not save profile');

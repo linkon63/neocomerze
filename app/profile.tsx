@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { collection, doc, getDoc } from 'firebase/firestore';
 
 import { AddressCard } from '@/components/profile/address-card';
 import { LogoutCard } from '@/components/profile/logout-card';
@@ -12,6 +13,7 @@ import { ProfileInfoCard } from '@/components/profile/profile-info-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/auth-context';
+import { db } from '@/utils/firebase';
 
 type ProfileTab = 'profile' | 'address' | 'orders' | 'logout' | 'home';
 
@@ -32,8 +34,12 @@ const tabs: TabItem[] = [
 const avatarImage = require('../assets/images/icon.png');
 
 export default function ProfileScreen() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, userPhone } = useAuth();
   const [activeTab, setActiveTab] = useState<ProfileTab>('profile');
+  const [headerInfo, setHeaderInfo] = useState<{ name: string; phone: string }>({
+    name: 'Linkon',
+    phone: userPhone || '+880 1516-164420',
+  });
 
   const activeTitle = useMemo(
     () => tabs.find((tab) => tab.key === activeTab)?.title ?? 'Profile',
@@ -43,7 +49,17 @@ export default function ProfileScreen() {
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileInfoCard />;
+        return (
+          <ProfileInfoCard
+            onProfileSaved={(data) => {
+              const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+              setHeaderInfo((prev) => ({
+                name: fullName || prev.name,
+                phone: data.phone || prev.phone,
+              }));
+            }}
+          />
+        );
       case 'address':
         return <AddressCard />;
       case 'orders':
@@ -56,6 +72,27 @@ export default function ProfileScreen() {
         return null;
     }
   };
+
+  useEffect(() => {
+    if (!userPhone) return;
+    setHeaderInfo((prev) => ({ ...prev, phone: userPhone }));
+    const loadProfile = async () => {
+      try {
+        const snap = await getDoc(doc(collection(db, 'users'), userPhone));
+        if (snap.exists()) {
+          const data = snap.data() as { first_name?: string; last_name?: string; phone?: string };
+          const fullName = `${data?.first_name || ''} ${data?.last_name || ''}`.trim();
+          setHeaderInfo((prev) => ({
+            name: fullName || prev.name,
+            phone: data?.phone || prev.phone || userPhone,
+          }));
+        }
+      } catch {
+        // ignore fetch errors; UI will keep defaults
+      }
+    };
+    loadProfile();
+  }, [userPhone]);
 
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
@@ -74,10 +111,10 @@ export default function ProfileScreen() {
               </View>
             </View>
             <ThemedText type="title" style={styles.name}>
-              Linkon
+              {headerInfo.name}
             </ThemedText>
             <ThemedText style={styles.role}>Premium shopper</ThemedText>
-            <ThemedText style={styles.contact}>+880 1516-164420</ThemedText>
+            <ThemedText style={styles.contact}>{headerInfo.phone}</ThemedText>
           </View>
 
           <View style={styles.tabs}>
