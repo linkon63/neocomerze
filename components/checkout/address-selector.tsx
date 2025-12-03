@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { collection, doc, getDoc } from 'firebase/firestore';
 
 import { ThemedText } from '@/components/themed-text';
 import { useAuth } from '@/context/auth-context';
 import { endpoints } from '@/constants/api';
 import { db } from '@/utils/firebase';
+import { divisions, districts } from '@/data/locations';
 
 export type CheckoutAddress = {
   id: string;
@@ -27,7 +28,9 @@ type FormState = {
   lastName: string;
   phone: string;
   addressLine: string;
-  city: string;
+  divisionId: string;
+  districtId: string;
+  area: string;
   postcode: string;
   country: string;
 };
@@ -37,7 +40,9 @@ const initialForm: FormState = {
   lastName: '',
   phone: '',
   addressLine: '',
-  city: '',
+  divisionId: '',
+  districtId: '',
+  area: '',
   postcode: '',
   country: 'Bangladesh',
 };
@@ -51,11 +56,21 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
   const [error, setError] = useState<string | null>(null);
+  const [divisionOpen, setDivisionOpen] = useState(false);
+  const [districtOpen, setDistrictOpen] = useState(false);
 
   const selectedAddress = useMemo(
     () => addresses.find((a) => a.id === selectedId) || null,
     [addresses, selectedId]
   );
+
+  const filteredDistricts = useMemo(
+    () => districts.filter((d) => d.division_id === form.divisionId),
+    [form.divisionId]
+  );
+
+  const divisionName = (id: string) => divisions.find((d) => d.id === id)?.name || '';
+  const districtName = (id: string) => districts.find((d) => d.id === id)?.name || '';
 
   useEffect(() => {
     const loadCustomer = async () => {
@@ -118,9 +133,29 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
     loadAddresses();
   }, [customerId, onSelect, selectedId]);
 
+  const updateField = (key: keyof FormState, value: string) => {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === 'divisionId') {
+        next.districtId = '';
+      }
+      return next;
+    });
+    setError(null);
+  };
+
   const handleSave = async () => {
     setError(null);
-    if (!form.firstName || !form.lastName || !form.phone || !form.addressLine || !form.city || !form.postcode) {
+    if (
+      !form.firstName ||
+      !form.lastName ||
+      !form.phone ||
+      !form.addressLine ||
+      !form.area ||
+      !form.divisionId ||
+      !form.districtId ||
+      !form.postcode
+    ) {
       setError('Please fill all required fields');
       return;
     }
@@ -135,8 +170,9 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
           first_name: form.firstName,
           last_name: form.lastName,
           phone: form.phone,
-          address: form.addressLine,
-          city: form.city,
+          state: divisionName(form.divisionId),
+          city: districtName(form.districtId),
+          address: `${form.area}, ${form.addressLine}`,
           postcode: form.postcode,
           country: form.country,
           type: 'billing',
@@ -155,8 +191,8 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
       const newAddress: CheckoutAddress = {
         id: `new-${Date.now()}`,
         label: `${form.firstName} ${form.lastName}`,
-        address: form.addressLine,
-        city: form.city,
+        address: `${form.area}, ${form.addressLine}`,
+        city: districtName(form.districtId) || form.area,
         phone: form.phone,
         isDefault: true,
       };
@@ -247,33 +283,119 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
                 <Ionicons name="close" size={20} color="#111827" />
               </Pressable>
             </View>
-            <View style={styles.form}>
-              {(
-                [
-                  { key: 'firstName', placeholder: 'First name*' },
-                  { key: 'lastName', placeholder: 'Last name*' },
-                  { key: 'phone', placeholder: 'Phone*', keyboardType: 'phone-pad' },
-                  { key: 'addressLine', placeholder: 'Address line*' },
-                  { key: 'city', placeholder: 'City / Area*' },
-                  { key: 'postcode', placeholder: 'Postcode*', keyboardType: 'number-pad' },
-                  { key: 'country', placeholder: 'Country*' },
-                ] as const
-              ).map((field) => (
+            <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
+              <View style={styles.row}>
                 <TextInput
-                  key={field.key}
-                  placeholder={field.placeholder}
+                  placeholder="First name*"
                   placeholderTextColor="#9ca3af"
-                  value={(form as any)[field.key]}
-                  onChangeText={(text) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      [field.key]: text,
-                    }))
-                  }
-                  style={styles.input}
-                  keyboardType={field.keyboardType as any}
+                  value={form.firstName}
+                  onChangeText={(text) => updateField('firstName', text)}
+                  style={[styles.input, styles.half]}
                 />
-              ))}
+                <TextInput
+                  placeholder="Last name*"
+                  placeholderTextColor="#9ca3af"
+                  value={form.lastName}
+                  onChangeText={(text) => updateField('lastName', text)}
+                  style={[styles.input, styles.half]}
+                />
+              </View>
+              <TextInput
+                placeholder="Phone*"
+                placeholderTextColor="#9ca3af"
+                value={form.phone}
+                onChangeText={(text) => updateField('phone', text)}
+                style={styles.input}
+                keyboardType="phone-pad"
+              />
+
+              <Pressable
+                style={styles.select}
+                onPress={() => {
+                  setDivisionOpen((prev) => !prev);
+                  setDistrictOpen(false);
+                }}>
+                <ThemedText style={styles.selectLabel}>Division*</ThemedText>
+                <ThemedText style={styles.selectValue}>
+                  {divisionName(form.divisionId) || 'Select division'}
+                </ThemedText>
+              </Pressable>
+              {divisionOpen ? (
+                <View style={styles.optionList}>
+                  {divisions.map((div) => (
+                    <Pressable
+                      key={div.id}
+                      style={styles.optionItem}
+                      onPress={() => {
+                        updateField('divisionId', div.id);
+                        setDivisionOpen(false);
+                      }}>
+                      <ThemedText>{div.name}</ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
+
+              <Pressable
+                style={[styles.select, { opacity: form.divisionId ? 1 : 0.6 }]}
+                disabled={!form.divisionId}
+                onPress={() => {
+                  setDistrictOpen((prev) => !prev);
+                  setDivisionOpen(false);
+                }}>
+                <ThemedText style={styles.selectLabel}>District*</ThemedText>
+                <ThemedText style={styles.selectValue}>
+                  {districtName(form.districtId) || 'Select district'}
+                </ThemedText>
+              </Pressable>
+              {districtOpen ? (
+                <View style={styles.optionList}>
+                  {filteredDistricts.map((dist) => (
+                    <Pressable
+                      key={dist.id}
+                      style={styles.optionItem}
+                      onPress={() => {
+                        updateField('districtId', dist.id);
+                        setDistrictOpen(false);
+                      }}>
+                      <ThemedText>{dist.name}</ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
+
+              <TextInput
+                placeholder="Area / City*"
+                placeholderTextColor="#9ca3af"
+                value={form.area}
+                onChangeText={(text) => updateField('area', text)}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Address line*"
+                placeholderTextColor="#9ca3af"
+                value={form.addressLine}
+                onChangeText={(text) => updateField('addressLine', text)}
+                style={styles.input}
+              />
+              <View style={styles.row}>
+                <TextInput
+                  placeholder="Postcode*"
+                  placeholderTextColor="#9ca3af"
+                  value={form.postcode}
+                  onChangeText={(text) => updateField('postcode', text)}
+                  style={[styles.input, styles.half]}
+                  keyboardType="number-pad"
+                />
+                <TextInput
+                  placeholder="Country*"
+                  placeholderTextColor="#9ca3af"
+                  value={form.country}
+                  onChangeText={(text) => updateField('country', text)}
+                  style={[styles.input, styles.half]}
+                />
+              </View>
+
               {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
               <Pressable
                 disabled={saving}
@@ -281,7 +403,7 @@ export function AddressSelector({ selectedId, onSelect }: Props) {
                 onPress={handleSave}>
                 <ThemedText style={styles.saveText}>{saving ? 'Saving…' : 'Save address'}</ThemedText>
               </Pressable>
-            </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -405,6 +527,43 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  half: {
+    flex: 1,
+  },
+  select: {
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#f9fafb',
+  },
+  selectLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  selectValue: {
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  optionList: {
+    maxHeight: 160,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+  },
+  optionItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
   },
   error: {
     color: '#c0362c',
