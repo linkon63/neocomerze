@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { collection, doc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
 
@@ -86,65 +86,79 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        {generalInfo?.media?.[0]?.original_url ? (
-          <Image source={generalInfo.media[0].original_url} style={styles.logo} contentFit="contain" />
-        ) : (
-          <ThemedText type="title" style={styles.title}>
-            {generalInfo?.shop_name || 'Register'}
-          </ThemedText>
-        )}
-        {generalInfo?.top_bar_slogan ? (
-          <ThemedText style={styles.subtitle}>{generalInfo.top_bar_slogan}</ThemedText>
-        ) : null}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoider}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedView style={styles.container}>
+            {generalInfo?.media?.[0]?.original_url ? (
+              <Image source={generalInfo.media[0].original_url} style={styles.logo} contentFit="contain" />
+            ) : (
+              <ThemedText type="title" style={styles.title}>
+                {generalInfo?.shop_name || 'Register'}
+              </ThemedText>
+            )}
+            {generalInfo?.top_bar_slogan ? (
+              <ThemedText style={styles.subtitle}>{generalInfo.top_bar_slogan}</ThemedText>
+            ) : null}
 
-        <View style={styles.form}>
-          <ThemedText style={styles.label}>Phone</ThemedText>
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            placeholder="01516164420"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-          />
+            <View style={styles.form}>
+              <ThemedText style={styles.label}>Phone</ThemedText>
+              <TextInput
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                placeholder="01516164420"
+                placeholderTextColor="#9ca3af"
+                style={styles.input}
+              />
 
-          <ThemedText style={styles.label}>Password</ThemedText>
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="password"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-          />
+              <ThemedText style={styles.label}>Password</ThemedText>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholder="password"
+                placeholderTextColor="#9ca3af"
+                style={styles.input}
+              />
 
-          <ThemedText style={styles.label}>Confirm password</ThemedText>
-          <TextInput
-            value={confirm}
-            onChangeText={setConfirm}
-            secureTextEntry
-            placeholder="password"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-          />
+              <ThemedText style={styles.label}>Confirm password</ThemedText>
+              <TextInput
+                value={confirm}
+                onChangeText={setConfirm}
+                secureTextEntry
+                placeholder="password"
+                placeholderTextColor="#9ca3af"
+                style={styles.input}
+              />
 
-          {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+              {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
 
-          <Pressable style={styles.button} onPress={onSubmit} disabled={submitting}>
-            <ThemedText style={styles.buttonText}>{submitting ? 'Submitting…' : 'Register'}</ThemedText>
-          </Pressable>
-          <Pressable style={[styles.secondaryButton, styles.outline]} onPress={() => router.replace('/login')}>
-            <ThemedText style={styles.secondaryText}>Back to login</ThemedText>
-          </Pressable>
-        </View>
-      </ThemedView>
+              <Pressable style={styles.button} onPress={onSubmit} disabled={submitting}>
+                <ThemedText style={styles.buttonText}>{submitting ? 'Submitting…' : 'Register'}</ThemedText>
+              </Pressable>
+              <Pressable style={[styles.secondaryButton, styles.outline]} onPress={() => router.replace('/login')}>
+                <ThemedText style={styles.secondaryText}>Back to login</ThemedText>
+              </Pressable>
+            </View>
+          </ThemedView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  keyboardAvoider: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   container: {
     flex: 1,
     alignItems: 'center',
