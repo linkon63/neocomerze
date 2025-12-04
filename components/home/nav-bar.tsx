@@ -159,11 +159,6 @@ export function NavBar({ accent, onProfilePress, onSearch, logoUrl, shopName }: 
               isFocused ? styles.searchInputFocused : styles.searchInputBlurred,
             ]}
           />
-          <View style={styles.searchOverlay}>
-            <Pressable style={[styles.searchIcon, { backgroundColor: accent }]}>
-              <ThemedText style={styles.searchIconText}>🔍</ThemedText>
-            </Pressable>
-          </View>
         </View>
 
         {shouldShowDropdown ? (

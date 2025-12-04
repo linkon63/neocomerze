@@ -366,7 +366,7 @@ export default function ProductDetailScreen() {
                     style={[styles.primaryButton, { backgroundColor: palette.accent }]}
                     onPress={handleAddToCart}>
                     <ThemedText style={[styles.primaryText, { color: '#ffffff' }]}>
-                      Add to cart
+                      Cart
                     </ThemedText>
                   </Pressable>
                   <Pressable
