@@ -112,11 +112,20 @@ export function NavBar({ accent, onProfilePress, onSearch, logoUrl, shopName }: 
     };
   }, [query]);
 
+  const clearSearch = () => {
+    latestQueryRef.current = '';
+    setQuery('');
+    setResults([]);
+    setSearchError(null);
+    setLoadingResults(false);
+  };
+
   const handleSelectProduct = (product: SearchResult) => {
     setQuery(product.name);
     setResults([]);
     setIsFocused(false);
     inputRef.current?.blur();
+    clearSearch();
     router.push(`/product/${product.id}`);
   };
 
@@ -138,12 +147,13 @@ export function NavBar({ accent, onProfilePress, onSearch, logoUrl, shopName }: 
             ref={inputRef}
             value={query}
             placeholder="Looking for?"
-            placeholderTextColor="#4b5563"
+            placeholderTextColor="#9ca3af"
             onChangeText={handleSearch}
             underlineColorAndroid="transparent"
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             autoCorrect={false}
+            selectionColor={accent}
             style={[
               styles.searchInput,
               isFocused ? styles.searchInputFocused : styles.searchInputBlurred,
@@ -243,14 +253,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f6fa',
     borderRadius: 999,
     paddingLeft: 14,
-    paddingVertical: 8,
-    height: 40,
+    paddingVertical: 10,
+    height: 48,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    color: '#0f172a',
+    fontWeight: '600',
     paddingRight: 70,
+    paddingVertical: 0,
+    lineHeight: 20,
+    textAlignVertical: 'center',
     borderWidth: 0,
     borderColor: 'transparent',
   },
